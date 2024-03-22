@@ -19,7 +19,7 @@ local function write_cache(data)
 end
 
 local function fetch_random_quote(callback)
-	local url = "https://api.quotable.io/quote/random?tags=inspirational"
+	local url = "https://api.quotable.io/random"
 	local command = { "curl", "-s", url }
 	local output = ""
 
@@ -55,18 +55,22 @@ local function wrap_text(text, width)
 	return lines
 end
 
+
+
 local function display_quote(quote, author)
-	local width_percent = 0.6
-	local width = math.floor(vim.api.nvim_win_get_width(0) * width_percent)
+	if quote == nil then
+		quote = "Failed to fetch quote. Please try again."
+		author = ""
+	end
 
-	quote = quote or ""
-	author = author or "Unknown"
+	local width = vim.api.nvim_win_get_width(0)
+	local height = vim.api.nvim_win_get_height(0) + 8
 
-	local quote_lines = wrap_text(quote, width)
+	local quote_lines = wrap_text(quote, math.max(math.floor(width / 3), 50))
 	local author_line = "-- " .. author
 
-	local start_row = math.floor((vim.api.nvim_win_get_height(0) - #quote_lines - 1) / 2)
-	local start_col = math.floor((vim.api.nvim_win_get_width(0) - width) / 2)
+	local start_row = math.floor((height - #quote_lines - 1) / 2) - 3
+	local start_col = math.floor((width - #quote_lines[1]) / 2)
 
 	-- Create a new buffer for the quote
 	local buf = vim.api.nvim_create_buf(false, true)
@@ -74,11 +78,11 @@ local function display_quote(quote, author)
 	vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
 	vim.api.nvim_buf_set_option(buf, 'swapfile', false)
 
-	-- Switch to the quote buffer
-	vim.api.nvim_set_current_buf(buf)
-
 	-- Set the buffer to be modifiable
 	vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+
+	-- insert height number of empty lines
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.fn['repeat']({ "" }, height))
 
 	for i, line in ipairs(quote_lines) do
 		local row = start_row + i - 1
@@ -86,32 +90,58 @@ local function display_quote(quote, author)
 	end
 
 	local author_row = start_row + #quote_lines
-	local author_col = math.floor((vim.api.nvim_win_get_width(0) - #author_line) / 2)
+	local author_col = math.max(start_col + #quote_lines[#quote_lines] - #author_line, start_col)
 	vim.api.nvim_buf_set_lines(buf, author_row, author_row, false, { string.rep(" ", author_col) .. author_line })
 
 	-- Set the buffer to be immutable
 	vim.api.nvim_buf_set_option(buf, 'modifiable', false)
 
-	-- Hide UI elements
-	vim.opt.laststatus = 0
-	vim.opt.ruler = false
-	vim.opt.showmode = false
-	vim.opt.showcmd = false
+	-- Create a new window for the quote buffer
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = 'editor',
+		width = width,
+		height = height,
+		col = 0,
+		row = 0,
+		style = 'minimal',
+	})
+
+	-- Set the background color of the window to match the default background
+	vim.api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
+	-- set the font colour of the buffer to match the default comment colour
+	vim.api.nvim_win_set_option(win, 'winhighlight', 'Normal:Comment')
+	vim.api.nvim_win_set_option(win, 'cursorcolumn', false)
+
+
+	-- Create an autocommand to close the quote window when leaving it
+	vim.cmd([[
+    augroup CloseQuoteWindow
+      autocmd!
+      autocmd BufLeave <buffer> execute 'bwipeout' . bufnr('%')
+    augroup END
+  ]])
 end
 
 local function display_random_quote()
+	local didDisplay = false
 	local cached_data = read_cache()
-	if cached_data then
+	if cached_data and cached_data.content then
 		display_quote(cached_data.content, cached_data.author)
+		didDisplay = true
 	end
 
+	--delete the cache file
+	-- os.remove(cache_file)
+
 	fetch_random_quote(function(quote, author)
-		if not cached_data then
+		if not didDisplay then
 			display_quote(quote, author)
 		end
 	end)
 end
 
+-- display_quote("Hello, World!", "Anonymous")
+-- display_random_quote()
 
 local function setup()
 	display_random_quote()
