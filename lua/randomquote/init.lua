@@ -1,4 +1,6 @@
 local cache_file = vim.fn.stdpath("data") .. "/randomquote.nvim/cache.json"
+
+-- read_cache reads data from the cache file if it exists
 local function read_cache()
 	local file = io.open(cache_file, "r")
 	if file then
@@ -9,6 +11,7 @@ local function read_cache()
 	return nil
 end
 
+-- write_cache writes data to the cache file
 local function write_cache(data)
 	local cache_dir = vim.fn.fnamemodify(cache_file, ":h")
 	if vim.fn.isdirectory(cache_dir) == 0 then
@@ -22,6 +25,7 @@ local function write_cache(data)
 	end
 end
 
+-- fetch_random_quote fetches a random quote from the quotable API
 local function fetch_random_quote(callback)
 	local url = "https://api.quotable.io/random"
 	local command = { "curl", "-s", url }
@@ -40,6 +44,7 @@ local function fetch_random_quote(callback)
 	})
 end
 
+-- wrap_text wraps text to a given width by breaking it into lines
 local function wrap_text(text, width)
 	local lines = {}
 	local line = ""
@@ -59,8 +64,7 @@ local function wrap_text(text, width)
 	return lines
 end
 
-
-
+-- display_quote displays a quote in a new window
 local function display_quote(quote, author)
 	if quote == nil then
 		quote = "Failed to fetch quote. Please try again."
@@ -156,6 +160,7 @@ local function display_quote(quote, author)
   ]])
 end
 
+-- display_random_quote grabs a random quote from the API and/or cache and displays it
 local function display_random_quote()
 	local didDisplay = false
 	local cached_data = read_cache()
@@ -177,6 +182,7 @@ end
 -- display_quote("Hello, World!", "Anonymous")
 -- display_random_quote()
 
+-- setup function to be called when the plugin is loaded
 local function setup()
 	-- Check if Vim has been asked to do something else
 	if vim.fn.argc() > 0 then
@@ -186,7 +192,12 @@ local function setup()
 	display_random_quote()
 end
 
+-- Create a command to display a random quote
+vim.cmd([[
+  command! RandomQuote lua require('randomquote').display_random_quote()
+]])
 
+-- Return the public API
 return {
 	display_random_quote = display_random_quote,
 	setup = setup,
