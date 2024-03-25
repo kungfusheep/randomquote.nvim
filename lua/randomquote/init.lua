@@ -1,5 +1,4 @@
-local cache_file = vim.fn.stdpath("data") .. "/random_quote_cache.json"
-
+local cache_file = vim.fn.stdpath("data") .. "/randomquote.nvim/cache.json"
 local function read_cache()
 	local file = io.open(cache_file, "r")
 	if file then
@@ -11,6 +10,11 @@ local function read_cache()
 end
 
 local function write_cache(data)
+	local cache_dir = vim.fn.fnamemodify(cache_file, ":h")
+	if vim.fn.isdirectory(cache_dir) == 0 then
+		vim.fn.mkdir(cache_dir, "p")
+	end
+
 	local file = io.open(cache_file, "w")
 	if file then
 		file:write(vim.fn.json_encode(data))
@@ -104,7 +108,37 @@ local function display_quote(quote, author)
 		col = 0,
 		row = 0,
 		style = 'minimal',
+		border = 'none',
 	})
+
+	vim.api.nvim_win_set_option(win, "number", false)
+	vim.api.nvim_win_set_option(win, "relativenumber", false)
+	vim.api.nvim_win_set_option(win, "cursorline", false)
+	vim.api.nvim_win_set_option(win, "cursorcolumn", false)
+	vim.api.nvim_win_set_option(win, "foldcolumn", '0')
+	vim.api.nvim_win_set_option(win, "signcolumn", 'no')
+	vim.api.nvim_win_set_option(win, "colorcolumn", '')
+	vim.api.nvim_win_set_option(win, "winhighlight", "Normal:Normal")
+
+	vim.api.nvim_win_call(win, function()
+		vim.cmd('set nowrap')
+		vim.cmd('set nolist')
+		vim.cmd('set nofoldenable')
+		vim.cmd('set noruler')
+		vim.cmd('set noshowcmd')
+		vim.cmd('set noshowmode')
+		vim.cmd('set laststatus=0')
+		vim.cmd('set showtabline=0')
+		vim.cmd('set cmdheight=1')
+		vim.cmd('set textwidth=0')
+		vim.cmd('set winfixwidth')
+		vim.cmd('set winfixheight')
+	end)
+
+	vim.api.nvim_win_set_option(win, 'number', false)
+	vim.api.nvim_win_set_option(win, 'relativenumber', false)
+
+	-- vim.api.nvim_win_set_cursor(win, { 1, 0 })
 
 	-- Set the background color of the window to match the default background
 	vim.api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
@@ -144,6 +178,11 @@ end
 -- display_random_quote()
 
 local function setup()
+	-- Check if Vim has been asked to do something else
+	if vim.fn.argc() > 0 then
+		return
+	end
+
 	display_random_quote()
 end
 
