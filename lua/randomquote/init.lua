@@ -115,41 +115,21 @@ local function display_quote(quote, author)
 		border = 'none',
 	})
 
-	vim.api.nvim_win_set_option(win, "number", false)
-	vim.api.nvim_win_set_option(win, "relativenumber", false)
-	vim.api.nvim_win_set_option(win, "cursorline", false)
-	vim.api.nvim_win_set_option(win, "cursorcolumn", false)
+	vim.api.nvim_win_set_option(win, 'number', false)
+	vim.api.nvim_win_set_option(win, 'relativenumber', false)
 	vim.api.nvim_win_set_option(win, "foldcolumn", '0')
 	vim.api.nvim_win_set_option(win, "signcolumn", 'no')
 	vim.api.nvim_win_set_option(win, "colorcolumn", '')
-	vim.api.nvim_win_set_option(win, "winhighlight", "Normal:Normal")
-
-	vim.api.nvim_win_call(win, function()
-		vim.cmd('set nowrap')
-		vim.cmd('set nolist')
-		vim.cmd('set nofoldenable')
-		vim.cmd('set noruler')
-		vim.cmd('set noshowcmd')
-		vim.cmd('set noshowmode')
-		vim.cmd('set laststatus=0')
-		vim.cmd('set showtabline=0')
-		vim.cmd('set cmdheight=1')
-		vim.cmd('set textwidth=0')
-		vim.cmd('set winfixwidth')
-		vim.cmd('set winfixheight')
-	end)
-
-	vim.api.nvim_win_set_option(win, 'number', false)
-	vim.api.nvim_win_set_option(win, 'relativenumber', false)
-
-	-- vim.api.nvim_win_set_cursor(win, { 1, 0 })
-
 	-- Set the background color of the window to match the default background
 	vim.api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
 	-- set the font colour of the buffer to match the default comment colour
 	vim.api.nvim_win_set_option(win, 'winhighlight', 'Normal:Comment')
 	vim.api.nvim_win_set_option(win, 'cursorcolumn', false)
 
+	vim.api.nvim_win_call(win, function()
+		vim.cmd('set nolist')
+		vim.cmd('set noruler')
+	end)
 
 	-- Create an autocommand to close the quote window when leaving it
 	vim.cmd([[
