@@ -2,7 +2,7 @@
 
 A simple and super minimal neovim startup screen plugin that displays a random quote from api.quotable.io.
 
-<image width="1025" height="464" src="assets/example.png">
+<image width="1025" height="464" src="https://raw.githubusercontent.com/kungfusheep/randomquote.nvim/master/assets/example.png">
 
 ## Features
 
@@ -33,3 +33,4 @@ The plugin is automatically triggered on startup. You can also manually trigger 
 
 This plugin is released under the [MIT License](https://opensource.org/licenses/MIT).
 
+](https://raw.githubusercontent.com/kungfusheep/randomquote.nvim/master/assets/example.png)
