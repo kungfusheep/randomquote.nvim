@@ -2,6 +2,8 @@
 
 A simple and super minimal neovim startup screen plugin that displays a random quote from api.quotable.io.
 
+<image width="1025" height="464" src="assets/example.png">
+
 ## Features
 
 - Super minimalistic, calming opening screen.
