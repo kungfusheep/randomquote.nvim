@@ -1,5 +1,10 @@
 local cache_file = vim.fn.stdpath("data") .. "/randomquote.nvim/cache.json"
 
+-- you can configure the plugin by passing a table to the setup function
+local config = {
+	close_key = "q", -- default key to close the quote window
+}
+
 -- read_cache reads data from the cache file if it exists
 local function read_cache()
 	local file = io.open(cache_file, "r")
@@ -138,6 +143,10 @@ local function display_quote(quote, author)
       autocmd BufLeave <buffer> execute 'bwipeout' . bufnr('%')
     augroup END
   ]])
+
+	-- Create a keymap to close the quote window when pressing 'q'
+	vim.api.nvim_buf_set_keymap(buf, 'n', config.close_key, '<cmd>close<CR>',
+		{ nowait = true, noremap = true, silent = true })
 end
 
 -- display_random_quote grabs a random quote from the API and/or cache and displays it
@@ -163,11 +172,13 @@ end
 -- display_random_quote()
 
 -- setup function to be called when the plugin is loaded
-local function setup()
+local function setup(opts)
 	-- Check if Vim has been asked to do something else
 	if vim.fn.argc() > 0 then
 		return
 	end
+
+	config = vim.tbl_extend("force", config, opts or {})
 
 	display_random_quote()
 end
