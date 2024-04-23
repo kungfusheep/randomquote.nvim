@@ -25,6 +25,16 @@ You can install the plugin using your preferred package manager, below is an exa
 },
 ```
 
+## Configuration
+
+You can configure the plugin using the `setup` function. The configuration is currently limited to being able to set the key to close the startup screen manually.
+
+```lua
+require("randomquote").setup({
+    close_key = "q", -- Key to close the startup screen manually
+})
+```
+
 ## Usage
 
 The plugin is automatically triggered on startup. You can also manually trigger it using the `:RandomQuote` command.
@@ -33,4 +43,3 @@ The plugin is automatically triggered on startup. You can also manually trigger 
 
 This plugin is released under the [MIT License](https://opensource.org/licenses/MIT).
 
-](https://raw.githubusercontent.com/kungfusheep/randomquote.nvim/master/assets/example.png)
