@@ -7,7 +7,7 @@ A simple and super minimal neovim startup screen plugin that displays a random q
 ## Features
 
 - Super minimalistic, calming opening screen.
-- Random quote from api.quotable.io.
+- Random quote from quotable.io local copy. 
 - No dependencies.
 - Provides a command to jump into the startup screen at any time.
 

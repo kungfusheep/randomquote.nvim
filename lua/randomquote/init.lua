@@ -1,53 +1,7 @@
-local cache_file = vim.fn.stdpath("data") .. "/randomquote.nvim/cache.json"
-
 -- you can configure the plugin by passing a table to the setup function
 local config = {
 	close_key = "q", -- default key to close the quote window
 }
-
--- read_cache reads data from the cache file if it exists
-local function read_cache()
-	local file = io.open(cache_file, "r")
-	if file then
-		local content = file:read("*all")
-		file:close()
-		return vim.fn.json_decode(content)
-	end
-	return nil
-end
-
--- write_cache writes data to the cache file
-local function write_cache(data)
-	local cache_dir = vim.fn.fnamemodify(cache_file, ":h")
-	if vim.fn.isdirectory(cache_dir) == 0 then
-		vim.fn.mkdir(cache_dir, "p")
-	end
-
-	local file = io.open(cache_file, "w")
-	if file then
-		file:write(vim.fn.json_encode(data))
-		file:close()
-	end
-end
-
--- fetch_random_quote fetches a random quote from the quotable API
-local function fetch_random_quote(callback)
-	local url = "https://api.quotable.io/random"
-	local command = { "curl", "-s", url }
-	local output = ""
-
-	vim.fn.jobstart(command, {
-		stdout_buffered = true,
-		on_stdout = function(_, data)
-			output = output .. table.concat(data, "\n")
-		end,
-		on_exit = function()
-			local response = vim.fn.json_decode(output)
-			write_cache({ content = response.content, author = response.author })
-			callback(response.content, response.author)
-		end,
-	})
-end
 
 -- wrap_text wraps text to a given width by breaking it into lines
 local function wrap_text(text, width)
@@ -149,23 +103,20 @@ local function display_quote(quote, author)
 		{ nowait = true, noremap = true, silent = true })
 end
 
+
+-- reads a random quote from the disk instead of the api.
+local function pick_random_quote(callback)
+	local quotes = dofile("quotes.lua")
+	local random_index = math.random(1, #quotes)
+	local quote = quotes[random_index].content
+	local author = quotes[random_index].author
+	callback(quote, author)
+	quotes = nil -- Allow the data to be garbage collected
+end
+
 -- display_random_quote grabs a random quote from the API and/or cache and displays it
 local function display_random_quote()
-	local didDisplay = false
-	local cached_data = read_cache()
-	if cached_data and cached_data.content then
-		display_quote(cached_data.content, cached_data.author)
-		didDisplay = true
-	end
-
-	--delete the cache file
-	-- os.remove(cache_file)
-
-	fetch_random_quote(function(quote, author)
-		if not didDisplay then
-			display_quote(quote, author)
-		end
-	end)
+	pick_random_quote(display_quote)
 end
 
 -- display_quote("Hello, World!", "Anonymous")
@@ -177,6 +128,8 @@ local function setup(opts)
 	if vim.fn.argc() > 0 then
 		return
 	end
+
+	math.randomseed(os.time())
 
 	config = vim.tbl_extend("force", config, opts or {})
 
