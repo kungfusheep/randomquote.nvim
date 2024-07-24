@@ -103,10 +103,17 @@ local function display_quote(quote, author)
 		{ nowait = true, noremap = true, silent = true })
 end
 
+-- plugin_source_dir returns the directory of the plugin source files, used to load the quotes with dofile
+local function plugin_source_dir()
+	local info = debug.getinfo(1, "S")
+	local scriptPath = info.source:sub(2)
+	return scriptPath:match("(.*/)")
+end
 
 -- reads a random quote from the disk instead of the api.
 local function pick_random_quote(callback)
-	local quotes = dofile("quotes.lua")
+	-- using dofile so memory is cleaned up after the quotes are loaded
+	local quotes = dofile(plugin_source_dir() .. "quotes.lua")
 	local random_index = math.random(1, #quotes)
 	local quote = quotes[random_index].content
 	local author = quotes[random_index].author
